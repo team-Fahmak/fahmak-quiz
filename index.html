@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فهمك - اختبار</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#0a1224;color:#e6f0ff;min-height:100vh}
+.container{max-width:700px;margin:0 auto;padding:20px 16px 100px}
+.header{position:sticky;top:0;background:#0a1224;z-index:10;padding:16px 0;border-bottom:1px solid #1a2a4a;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.progress-bar{height:5px;background:#1a2a4a;border-radius:3px;margin-top:12px;overflow:hidden}
+.progress-fill{height:100%;background:#3b82f6;transition:width .3s}
+.question-block{padding:26px 0;border-bottom:1px solid #1a2a4a}
+.question-title{font-size:18px;font-weight:600;line-height:1.7;margin-bottom:18px}
+.option{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;margin-bottom:8px;background:#111d35;border:1px solid #1e345e;border-radius:12px;cursor:pointer;transition:.2s}
+.option:hover{background:#162445;border-color:#2a4a80}
+.option.selected{background:#1a335f;border-color:#3b82f6}
+.option-text{font-size:16px;line-height:1.7;flex:1}
+.option input{appearance:none;width:24px;height:24px;border:2px solid #4a6aa0;border-radius:50%;flex-shrink:0;position:relative}
+.option input:checked{border-color:#60a5fa;background:#60a5fa}
+.option input:checked::after{content:'';position:absolute;width:10px;height:10px;background:#0a1224;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+.footer-btn{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,#0a1224 85%,transparent);padding:18px 16px;display:flex;justify-content:center}
+.btn{width:100%;max-width:700px;background:#3b82f6;color:#fff;border:none;border-radius:28px;padding:16px;font-size:17px;font-weight:700;font-family:'Cairo';cursor:pointer;transition:.2s}
+.btn:hover{background:#2563eb}
+.btn:disabled{opacity:.35}
+.card{background:#101c36;border:1px solid #1e345e;border-radius:16px;padding:24px;margin-top:20px}
+.input{width:100%;background:#0f1b33;border:1px solid #264071;border-radius:12px;padding:14px 16px;color:#fff;font-family:'Cairo';font-size:16px;margin-top:8px;outline:none}
+.input:focus{border-color:#3b82f6}
+.label{font-size:14px;color:#8aa8d0;margin-top:16px;display:block}
+.admin-table{width:100%;border-collapse:collapse;margin-top:16px}
+.admin-table th,.admin-table td{border:1px solid #1e345e;padding:8px;font-size:13px;text-align:right}
+.admin-table th{background:#162445}
+</style>
+</head>
+<body>
+<div class="container">
+<div id="loginScreen">
+<div class="card" style="margin-top:40px">
+<h1 style="font-size:26px;color:#60a5fa">اختبار فهمك 💙</h1>
+<p style="color:#8aa8d0;margin-top:8px;line-height:1.7">ادخل بياناتك قبل ما تبدأ الاختبار</p>
+<label class="label">الاسم</label>
+<input id="nameInput" class="input" placeholder="اكتب اسمك">
+<label class="label">السن</label>
+<input id="ageInput" type="number" class="input" placeholder="مثال: 12">
+<button class="btn" style="margin-top:20px" onclick="startQuiz()">دخول للاختبار</button>
+<div style="margin-top:16px;text-align:center">
+<button onclick="askAdmin()" style="background:none;border:none;color:#5a7fb5;font-family:'Cairo';font-size:13px;cursor:pointer;text-decoration:underline">دخول المشرف (بكلمة السر)</button>
+</div>
+</div>
+</div>
+
+<div id="quizScreen" style="display:none">
+<div class="header">
+<div>
+<div id="userInfo" style="font-size:13px;color:#60a5fa"></div>
+<div id="progressText" style="font-size:12px;color:#8aa8d0;margin-top:2px">سؤال 1 من 12</div>
+<div class="progress-bar"><div id="progressFill" class="progress-fill" style="width:8%"></div></div>
+</div>
+<button onclick="location.reload()" style="background:#162445;border:1px solid #264071;color:#8aa8d0;border-radius:10px;padding:8px 12px;font-family:'Cairo';font-size:12px;cursor:pointer">خروج</button>
+</div>
+<div id="quiz"></div>
+<div class="footer-btn"><button id="nextBtn" class="btn" onclick="nextStep()">التالي</button></div>
+</div>
+
+<div id="adminScreen" style="display:none">
+<div class="card">
+<h2 style="color:#60a5fa">الاستبيانات المحفوظة 🔒</h2>
+<p style="color:#8aa8d0;font-size:13px;margin-top:4px">محمية بكلمة السر fahmak - البيانات من جوجل شيت</p>
+<div id="adminData"></div>
+<button onclick="loadSheetData()" class="btn" style="margin-top:16px;background:#0f274e">تحديث من الشيت 🔄</button>
+<button onclick="location.reload()" class="btn" style="margin-top:10px;background:#162445;border:1px solid #264071">رجوع</button>
+<button onclick="deleteAll()" style="margin-top:10px;width:100%;background:#7f1d1d;color:#fff;border:none;border-radius:12px;padding:12px;font-family:'Cairo';cursor:pointer">حذف المحلي فقط (بكلمة السر)</button>
+</div>
+</div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDg7_tHoDX0ziYAtF2kwTVXRO2osPsQ8qzmrHVDDnpjpAOehcQ3qJj9iIHNdhjyMFVOA/exec";
+
+const questions = [
+{ id:1, q:"لما بتكون في المدرسة وسط زمايلك، بتحس بإيه؟", opts:["أ. ببقى مرتاح وبتكلم معاهم عادي","و. بتوتر وبحتاج حد يشجعني","إ. بخاف أغلط ويضحكوا عليا","ى. بزهق بسرعة ومش بعرف أكمل معاهم"]},
+{ id:2, q:"لما حد يطلب منك تعمل حاجة صعبة، بتتصرف إزاي؟", opts:["أ. بحاول أعملها لوحدي","و. بطلب مساعدة على طول","إ. بخاف أفشل ومبعملهاش","ى. بزهق وبسيبها"]},
+{ id:3, q:"لما بتزعل، بتعمل إيه غالبا؟", opts:["أ. بقول لحد أنا زعلان من إيه","و. بعيط ومش بعرف أشرح اللي جوايا","إ. بعصب وبزعق","ى. بخبي زعلي ومش بحب أتكلم"]},
+{ id:4, q:"لما مامتك أو باباك يسيبوك وتروح مكان لوحدك، بتحس بإيه؟", opts:["أ. بيبقى عادي ومطمن","و. بفتقدهم شوية لحد ما يرجعوا","إ. بخاف يحصلهم حاجة أو مارجعش أشوفهم","ى. بفضل قلقان ومش بعرف أستمتع باللعب"]},
+{ id:5, q:"لما يكون عندك واجب أو مهمة محتاجة تركيز، بيحصل إيه؟", opts:["أ. بخلصها وبعدين ألعب","و. بعملها بس ببطء","إ. بسرح ومش بعرف أخلصها","ى. بزهق ومش بكملها"]},
+{ id:6, q:"لما تستنى دورك في لعبة أو طابور، بتعمل إيه؟", opts:["أ. بستنى عادي","و. بزهق شوية بس بستنى","إ. ببقى متوتر وعايز دوري ييجي بسرعة","ى. بمشي ومش بستنى"]},
+{ id:7, q:"لما حد يغير خطتك أو يقولك لأ، بتحس بإيه؟", opts:["أ. بقبل الموضوع حتى لو مش عاجبني","و. بزعل شوية وبعدها بهدى","إ. بعصب وبحتاج وقت طويل عشان أهدى","ى. بحس إن محدش بيسمعني أو بيفهمني"]},
+{ id:8, q:"لما تغلط في حاجة، بتفكر في إيه؟", opts:["أ. عادي، هتعلم وأحاول تاني","و. بزعل من نفسي شوية","إ. بخاف حد يلومني أو يعاقبني","ى. بفضل أفكر في الغلطة ومش بعرف أنساها"]},
+{ id:9, q:"لما تكون وسط ناس جديدة، بتعمل إيه؟", opts:["أ. بتعرف عليهم بالتدريج","و. بستنى حد يكلمني الأول","إ. بخاف أتكلم عشان ممكن يضحكوا عليا","ى. بتجنب الكلام أو اللعب معاهم حتى لو نفسي"]},
+{ id:10, q:"في الفترة الأخيرة، بتحس بإيه في أغلب الأيام؟", opts:["أ. مبسوط وبستمتع بالحاجات اللي بحبها","و. بزعل أوقات لكن بفرح تاني","إ. ببقى قلقان أو خايف من حاجات كتير","ى. ببقى حزين أو مش مستمتع بالحاجات اللي كنت بحبها"]},
+{ id:11, q:"لما حد يشرحلك حاجة، بيكون إيه الأصعب عليك؟", opts:["أ. بفهم وبعرف أتابع غالبًا","و. بحتاج الشرح يتكرر أوقات","إ. بسرح وبفوت أجزاء من الكلام","ى. ببقى متوتر أو مشغول بحاجة تانية ومش بعرف أركز"]},
+{ id:12, q:"لما يحصل خلاف بينك وبين صاحبك، بتعمل إيه؟", opts:["أ. بتكلم معاه ونحاول نحل المشكلة","و. بزعل وبستنى هو اللي يكلمني","إ. بعصب وممكن أقول كلام أندم عليه","ى. ببعد عنه وبحس إن محدش عايز يصاحبني"]},
+];
+
+let current=0, answers={}, userName="", userAge="";
+const STORAGE_KEY="fahmak_results";
+
+function startQuiz(){
+  userName=document.getElementById('nameInput').value.trim();
+  userAge=document.getElementById('ageInput').value.trim();
+  if(!userName || !userAge){ alert('اكتب الاسم والسن الأول'); return; }
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  document.getElementById('userInfo').innerText=`${userName} - ${userAge} سنة`;
+  render();
+}
+
+function render(){
+  const quizDiv=document.getElementById('quiz'); quizDiv.innerHTML='';
+  const q=questions[current];
+  const block=document.createElement('div'); block.className='question-block';
+  block.innerHTML=`<div class="question-title">${q.id}. ${q.q}</div>`;
+  q.opts.forEach((opt,idx)=>{
+    const label=document.createElement('label');
+    label.className='option'+(answers[current]==idx?' selected':'');
+    label.innerHTML=`<span class="option-text">${opt}</span><input type="radio" name="q${current}" ${answers[current]==idx?'checked':''}>`;
+    label.onclick=()=>{answers[current]=idx; render(); updateProgress();};
+    block.appendChild(label);
+  });
+  quizDiv.appendChild(block);
+  document.getElementById('nextBtn').innerText = current===questions.length-1 ? 'حفظ وعرض النتيجة' : 'التالي';
+  updateProgress();
+}
+function updateProgress(){
+  document.getElementById('progressFill').style.width = ((Object.keys(answers).length)/questions.length*100)+'%';
+  document.getElementById('progressText').innerText=`سؤال ${current+1} من ${questions.length}`;
+  document.getElementById('nextBtn').disabled = answers[current]===undefined;
+}
+function nextStep(){
+  if(answers[current]===undefined) return;
+  if(current < questions.length-1){ current++; render(); window.scrollTo(0,0); }
+  else { saveAndShowResult(); }
+}
+function saveAndShowResult(){
+  const score = Object.values(answers).reduce((a,b)=>a+b,0);
+  const result = { name:userName, age:userAge, answers, score, date:new Date().toLocaleString('ar-EG') };
+  let all = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  all.push(result);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+
+  const url = `${SCRIPT_URL}?name=${encodeURIComponent(userName)}&age=${encodeURIComponent(userAge)}&score=${encodeURIComponent(score)}`;
+  fetch(url, {mode:'no-cors'});
+  
+  const quizDiv=document.getElementById('quiz');
+  quizDiv.innerHTML=`<div class="card">
+  <h2 style="font-size:22px;color:#60a5fa">تم الحفظ بنجاح 💾</h2>
+  <p style="color:#8aa8d0;margin-top:8px">أهلا ${userName}، نتيجتك اتحفظت في الشيت ومش هتتمسح.</p>
+  <div style="margin-top:20px;padding:16px;background:#0a1224;border:1px solid #264071;border-radius:12px;text-align:center;font-size:28px;font-weight:700;color:#60a5fa">${score} / ${questions.length*3}</div>
+  <p style="margin-top:12px;color:#5a7fb5;font-size:12px">هذه نتيجة مبدئية وليست تشخيص طبي</p>
+  <button onclick="location.reload()" style="margin-top:20px;width:100%;background:#162445;color:#8aa8d0;border:1px solid #264071;border-radius:12px;padding:12px;font-family:Cairo;cursor:pointer">إنهاء</button>
+  </div>`;
+  document.querySelector('.footer-btn').style.display='none';
+  document.getElementById('progressFill').style.width='100%';
+}
+
+function askAdmin(){
+  const pass = prompt('ادخل كلمة السر للمشرف:');
+  if(pass==='fahmak'){ showAdmin(); } else if(pass!==null){ alert('كلمة السر غلط'); }
+}
+function showAdmin(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('adminScreen').style.display='block';
+  loadSheetData();
+}
+
+function loadSheetData(){
+  document.getElementById('adminData').innerHTML='<p style="color:#8aa8d0">جاري تحميل البيانات من الشيت...</p>';
+  fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
+    if(data.length===0){
+      let all = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+      if(all.length===0) document.getElementById('adminData').innerHTML='<p style="color:#8aa8d0">مفيش بيانات لسه</p>';
+      else renderAdmin(all, true);
+      return;
+    }
+    renderAdmin(data, false);
+  }).catch(()=>{
+    let all = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    renderAdmin(all, true);
+  });
+}
+
+function renderAdmin(arr, isLocal){
+  let html = `<p style="margin-top:10px;color:#60a5fa;font-size:13px">${isLocal?'من الذاكرة المحلية':'من جوجل شيت'} - إجمالي: ${arr.length}</p>`;
+  html+=`<table class="admin-table"><tr><th>الاسم</th><th>السن</th><th>النتيجة</th><th>التاريخ</th></tr>${arr.map(r=>`<tr><td>${r.name}</td><td>${r.age}</td><td>${r.score}</td><td>${r.date||''}</td></tr>`).reverse().join('')}</table>`;
+  document.getElementById('adminData').innerHTML=html;
+}
+
+function deleteAll(){
+  const pass = prompt('تأكيد الحذف - ادخل كلمة السر fahmak:');
+  if(pass==='fahmak'){ localStorage.removeItem(STORAGE_KEY); alert('تم حذف المحلي فقط، بيانات الشيت هتفضل موجودة في جوجل شيت'); loadSheetData(); }
+  else if(pass!==null){ alert('كلمة السر غلط'); }
+}
+</script>
+</body>
+</html>
